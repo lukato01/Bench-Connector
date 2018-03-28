@@ -3,19 +3,16 @@
 import http.client
 import json
 
-
 def setSample(sample_id):
     return "P_" + sample_id, "A_" + sample_id
     
 headers = {
     'content-type': "application/json",
     'cache-control': "no-cache"
-}
-   
+}  
 user = "bcm"
 host = "mgtldeva.atran.mssm.edu:8082"
 analysisPipeline = "Carrier_Screen_Analysis_v1"
-
 
 ### Upload VCF, register patient initiate analysis 
 
@@ -23,7 +20,6 @@ vcf = "/usr/src/cartagenia_bcm/upload/test_021318_0.vcf"
 sample = "021318_0"
 patient, analysis = setSample(sample)
 gender = "f"
-
    
 payload = {
     "username": user,
@@ -53,7 +49,6 @@ print(json.dumps(output, indent=4))
 ### Check VCF file exists 
 
 vcf = "test_021318_0.vcf"
-
 payload = {
     "username": user,
     "fileName": vcf
@@ -66,7 +61,6 @@ data = res.read()
 output = json.loads(data.decode("utf-8")) 	
 print(json.dumps(output, indent=4)) 		
 
-
 ### Check patient status 
 
 payload = { "username": user, "accession": patient}
@@ -77,17 +71,14 @@ data = res.read()
 output = json.loads(data.decode("utf-8")) 	
 print(json.dumps(output, indent=4)) 	
 
-
 ### Export completed report 
 payload = {
     "username": user,
     "analysis_reference": "A_021318_0"
 }
 
-
 conn = http.client.HTTPConnection(host) 
 conn.request("POST", "/bcm/analysis/analysisInfo", json.dumps(payload), headers) 
-
 res = conn.getresponse()
 data = res.read()
 output = json.loads(data.decode("utf-8"))
