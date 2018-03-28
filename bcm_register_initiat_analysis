@@ -1,0 +1,49 @@
+import http.client
+import json
+
+
+def setSample(sample_id):
+    return "P_" + sample_id, "A_" + sample_id
+    
+    
+user = "bcm"
+host = "mgtldeva.atran.mssm.edu:8082"
+#analysisPipeline = "Bioinformatics_Carrier_CNV_V1.0"
+analysisPipeline = "Carrier_Screen_Analysis_v1"
+
+
+vcf = "/usr/src/cartagenia_bcm/upload/test_021318_0.vcf"
+sample = "021318_0"
+patient, analysis = setSample(sample)
+gender = "f"
+
+headers = {
+    'content-type': "application/json",
+    'cache-control': "no-cache"
+}
+    
+payload = {
+    "username": user,
+    "patientFolder": "Bioinformatics",
+    "patient": {
+        "accession": patient,
+        "gender": gender
+    },
+    "vcf_file": {
+        "filePath": vcf,
+        "vcf_file_type": "MSSM VCF"
+    },
+    "analysis": {
+        "reference": analysis,
+        "sample": sample,
+        "analysisPipeline": analysisPipeline
+    }
+}
+
+
+conn = http.client.HTTPConnection(host) 
+conn.request("POST", "/bcm/bcmassayregistration", json.dumps(payload), headers) 
+res = conn.getresponse()
+data = res.read() # Data will contan server's response 
+output = json.loads(data.decode("utf-8")) 	
+print(json.dumps(output, indent=4)) 		
