@@ -1,16 +1,13 @@
 import http.client
 import json
 
-
 def setSample(sample_id):
     return "P_" + sample_id, "A_" + sample_id
-    
-    
+        
 user = "bcm"
 host = "mgtldeva.atran.mssm.edu:8082"
 #analysisPipeline = "Bioinformatics_Carrier_CNV_V1.0"
 analysisPipeline = "Carrier_Screen_Analysis_v1"
-
 
 vcf = "/usr/src/cartagenia_bcm/upload/test_021318_0.vcf"
 sample = "021318_0"
@@ -39,7 +36,6 @@ payload = {
         "analysisPipeline": analysisPipeline
     }
 }
-
 
 conn = http.client.HTTPConnection(host) 
 conn.request("POST", "/bcm/bcmassayregistration", json.dumps(payload), headers) 
