@@ -1,0 +1,62 @@
+### Setup
+import http.client
+import json
+
+def setSample(sample_id):
+    return "P_" + sample_id, "A_" + sample_id
+    
+headers = {
+    'content-type': "application/json",
+    'cache-control': "no-cache"
+}
+   
+user = "bcm"
+host = "mgtldeva.atran.mssm.edu:8082"
+analysisPipeline = "Carrier_Screen_Analysis_v1"
+
+
+### Upload VCF, register patient initiate analysis 
+vcf = "/usr/src/cartagenia_bcm/upload/test_021318_0.vcf" 	# TODO: cant be hardcoded. may be "vcf = sys.argv[1]"
+sample = "021318_0"											# TODO: cant be hardcoded. may be "sample = sys.argv[2]"
+patient, analysis = setSample(sample)
+gender = "f"												# TODO: cant be hardcoded.
+ 
+payload = {
+    "username": user,
+    "patientFolder": "Bioinformatics",
+    "patient": {
+        "accession": patient,
+        "gender": gender
+    },
+    "vcf_file": {
+        "filePath": vcf,
+        "vcf_file_type": "MSSM VCF"
+    },
+    "analysis": {
+        "reference": analysis,
+        "sample": sample,
+        "analysisPipeline": analysisPipeline
+    }
+}
+conn = http.client.HTTPConnection(host) 
+conn.request("POST", "/bcm/bcmassayregistration", json.dumps(payload), headers) 
+res = conn.getresponse()
+data = res.read() 
+output = json.loads(data.decode("utf-8")) 	
+#print(json.dumps(output, indent=4))
+submissionStatus1 = output['submission']
+patientUrl = output['patient_url']
+analysisUrl = output['analysis_url']
+patientId = output['patient_id']
+analysisId = output['analysis_id'] 		
+aref = output['analysis_reference']
+analysisReference = (aref.split("_"))[1]+"_"+(aref.split("_"))[2]
+reusingDataFile = output['reusingDatafile']
+
+
+# TODO:
+# (3) REST API request to save the analysis identifier in the dashboard database.
+#registerCartagenia(sample_extractRepeat, submissionStatus, patientUrl, analysisUrl, patientId,
+#		 analysisId, analysisReference, reusingDataFile)
+
+
