@@ -1,0 +1,45 @@
+# (5) query the dashboard REST API for samples with outstanding Cartagenia data.
+# getIncompleteCartageniaSamples()
+
+
+### For each in-progress sample, check the patient status via the Bench Connector API
+
+### Setup
+def setSample(sample_id):
+    return "P_" + sample_id, "A_" + sample_id
+headers = {
+    'content-type': "application/json",
+    'cache-control': "no-cache"
+}
+user = "bcm"
+host = "mgtldeva.atran.mssm.edu:8082"
+
+sample = "021318_0"							# TODO: get from getIncompleteCartageniaSamples()
+patient, analysis = setSample(sample)
+
+payload = { "username": user, "accession": patient}
+conn = http.client.HTTPConnection(host)
+conn.request("POST", "/bcm/analysis/list", json.dumps(payload), headers) 
+res = conn.getresponse()
+data = res.read() 
+output = json.loads(data.decode("utf-8")) 	
+status = output['analyses'][0]['status']
+
+if status == 'COMPLETED':
+	# 5.a
+	# export of results via the API code
+	payload = { "username": user, "analysis_reference": analysisReference } # TODO: get analysisReference from getIncompleteCartageniaSamples()
+	conn = http.client.HTTPConnection(host) 
+	conn.request("POST", "/bcm/analysis/analysisInfo", json.dumps(payload), headers) 
+	res = conn.getresponse()
+	data = res.read()
+	output = json.loads(data.decode("utf-8"))
+	resultJSON = json.loads(output["export"])
+
+	# 5.b
+	# TODO:
+	# loadResult(analysisReference, resultJSON)
+	
+	# 5.c
+	# TODO:
+	# updateStatus(analysisReference, status) 
