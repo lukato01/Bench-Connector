@@ -1,26 +1,50 @@
-### Setup
 import http.client
 import json
 
+###
+## Functions
+#
 def setSample(sample_id):
     return "P_" + sample_id, "A_" + sample_id
-    
-headers = {
-    'content-type': "application/json",
-    'cache-control': "no-cache"
-}
-   
+
+
+###
+## Hardcoded variables
+#       
 user = "bcm"
 host = "mgtldeva.atran.mssm.edu:8082"
 analysisPipeline = "Carrier_Screen_Analysis_v1"
 
 
-### Upload VCF, register patient initiate analysis 
-vcf = "/usr/src/cartagenia_bcm/upload/test_021318_0.vcf" 	# TODO: cant be hardcoded. may be "vcf = sys.argv[1]"
-sample = "021318_0"											# TODO: cant be hardcoded. may be "sample = sys.argv[2]"
+###
+## Code
+#
+
+# Find the sample number
+file = open(sys.argv[1], "r") 
+lines_array = file.readlines()
+file.close()
+# 1. Find line with CHROM
+mystuff = ""
+for line in lines_array:
+	if ("#CHROM" in line):
+		mystuff = line
+		break
+# 2. Grep the certain column in that line
+my_sample = mystuff.strip().split()[9]
+
+
+### Upload VCF, register patient initiate analysis 	
+vcf = sys.argv[1]			# Example: "/usr/src/cartagenia_bcm/upload/test_021318_0.vcf" 
+sample = my_sample			# Example: "021318_0"
 patient, analysis = setSample(sample)
 gender = "f"												# TODO: cant be hardcoded.
  
+ 
+headers = {
+    'content-type': "application/json",
+    'cache-control': "no-cache"
+}
 payload = {
     "username": user,
     "patientFolder": "Bioinformatics",
@@ -42,8 +66,9 @@ conn = http.client.HTTPConnection(host)
 conn.request("POST", "/bcm/bcmassayregistration", json.dumps(payload), headers) 
 res = conn.getresponse()
 data = res.read() 
-output = json.loads(data.decode("utf-8")) 	
+output = json.loads(data.decode("utf-8")) 
 #print(json.dumps(output, indent=4))
+
 submissionStatus1 = output['submission']
 patientUrl = output['patient_url']
 analysisUrl = output['analysis_url']
@@ -54,9 +79,12 @@ analysisReference = (aref.split("_"))[1]+"_"+(aref.split("_"))[2]
 reusingDataFile = output['reusingDatafile']
 
 
+
 # TODO:
 # (3) REST API request to save the analysis identifier in the dashboard database.
 #registerCartagenia(sample_extractRepeat, submissionStatus, patientUrl, analysisUrl, patientId,
 #		 analysisId, analysisReference, reusingDataFile)
+
+
 
 
